@@ -1,0 +1,28 @@
+EmailService.cs - Repos (azure.com)
+
+        private async Task SendMailAsync(Message message, CancellationToken cancellationToken)
+        {
+            string[] scopes = { FormattableString.Invariant($"{azureOptions.GraphApiUrl}.default") };
+            var clientCertificateCredential = new ClientCertificateCredential(azureOptions.TenantId, azureOptions.ClientId, certificateHandler.GetCertificate(azureOptions.CertificateSubjectDistinguishedName));
+
+            await new GraphServiceClient(clientCertificateCredential, scopes).Users[emailOptions.NotificationsEmailAddress]
+                .SendMail(message)
+                .Request()
+                .PostAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+<PackageReference Include="Microsoft.Graph" Version="4.22.0" />
+
+appsettings.json contains some of the configuration values used: appsettings.json - Repos (azure.com)
+...
+,
+  "AzureOptions": {
+    "ClientId": "bfdb7184-bbc9-49a0-8f9e-ba333c7ada25",
+    "TenantId": "f5be28b7-47cb-4efc-ae4d-49f6ba262da6",
+    "GraphApiUrl": "https://graph.microsoft.com/",
+    "CertificateSubjectDistinguishedName": "CN=WBSRefunds.snba.be"
+  },
+...
+
+the app has to be registered on azure by ASP and ASP has to generate a certificate that is linked (uploaded) to the app in azure and the certificate with private key has to be installed on the server where the app is running
+after installing the certificate on the server you need to explicitly give the service account of the application access to read the private key of the certificate
